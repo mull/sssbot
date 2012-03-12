@@ -7,7 +7,9 @@ module TeBot
       @port = port
       @nick = nick
       @channel = channel
-      @ident = "USER te-bot te-bot te-bot :tebot tebot"
+      @ident = "USER #{(@nick+" ")*3}:#{(@nick+" ")*2}"
+      @channels = {}
+      @channels[channel] = []
     end
   
     def connect
@@ -40,18 +42,19 @@ module TeBot
           send @ident
           send "JOIN #{@channel}"
           
-        when
-          /:(.+) PRIVMSG (#.+) :(.+)$/i
-          user = $1
+        when /:* (353) te-botjvl @ (#.*) :(.+)/
+          # Channel nick list
           channel = $2
-          message = $3
-          user = user.match(/(.+)!/)[1]
-          handle_privmsg(user, channel, message)
-
+          nicks = $3
+          joined_channel($2, $3)
       end
     end
     
     def handle_privmsg(user, channel, message)
+    end
+    
+    def channels
+      @channels
     end
   
     def main_loop
@@ -68,5 +71,15 @@ module TeBot
     def exit
       @irc.close
     end
+    
+    private
+    
+    def joined_channel(channel, nicks)
+      @channels[channel] ||= []
+      nicks.split(" ").each do |nick|
+        @channels[channel] << nick
+      end
+    end
   end
+  
 end
