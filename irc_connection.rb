@@ -64,7 +64,6 @@ module TeBot
         next if !ready
       
         handle_input(@irc.gets)
-      
       end
     end
   

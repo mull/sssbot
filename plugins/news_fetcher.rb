@@ -3,7 +3,7 @@ require 'net/http'
 require 'uri'
 require 'time'
 
-class NewsFetcher
+class NewsFetcher < TeBot::Plugin
   def initialize(bot_instance)
     @bot_instance = bot_instance
     @articles = []
