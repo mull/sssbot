@@ -3,7 +3,7 @@ require 'net/http'
 require 'uri'
 require 'time'
 
-class NewsFetcher < TeBot::Plugin
+class TeNewsFetcher < S3Bot::Plugin
   def initialize(bot_instance)
     @bot_instance = bot_instance
     @articles = []
@@ -16,13 +16,13 @@ class NewsFetcher < TeBot::Plugin
       end
     end
   end
-  
+
   def fetch_articles(silent = false)
     base_url = "http://te-beta.herokuapp.com"
     url = "#{base_url}/articles.json"
     content = JSON.parse Net::HTTP.get(URI.parse(url))
-    
-    
+
+
     if !silent && content != @articles
       # We have new articles
       new_content = (content - @articles)
@@ -35,7 +35,7 @@ class NewsFetcher < TeBot::Plugin
         end
       end
     end
-    
+
     @articles = content
   end
 end

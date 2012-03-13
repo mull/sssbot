@@ -1,22 +1,30 @@
 require "socket"
 
-module TeBot
-  class IRCConnection
-    def initialize(server, port, nick, channel)
+module S3Bot
+  class Connection
+    def initialize(server, port, nick, channels)
       @server = server
       @port = port
       @nick = nick
-      @channel = channel
       @ident = "USER #{(@nick+" ")*3}:#{(@nick+" ")*2}"
-      @channels = {}
-      @channels[channel] = []
+      @channels = {
+        :list => [],
+        :nicks => {},
+        :joined => {}
+      }
+      
+      if !channels.is_a?(Array)
+        @channels[:list] << channels
+      else
+        @channels[:list] = channels
+      end
     end
   
     def connect
       @irc = TCPSocket.open(@server, @port)
       send "NICK #{@nick}"
       send @ident
-      send "JOIN #{@channel}"
+      join_channels(@channels[:list])
     end
   
     def send(s)
@@ -38,9 +46,9 @@ module TeBot
           puts "PING #{$1}"
           send "PONG #{$1}"
           
-        when /(...)Register first./
+        when /(...)Register first./ # QuakeNET -.-
           send @ident
-          send "JOIN #{@channel}"
+          join_channels(@channels[:list])
           
         when /:* (353) te-botjvl @ (#.*) :(.+)/
           # Channel nick list
@@ -74,11 +82,18 @@ module TeBot
     private
     
     def joined_channel(channel, nicks)
-      @channels[channel] ||= []
+      @channels[:nicks][channel] ||= []
       nicks.split(" ").each do |nick|
-        @channels[channel] << nick
+        @channels[:nicks][channel] << nick
+      end
+    end
+    
+    def join_channels(channels)
+      if channels.is_a?(Array)
+        channels.each do |channel|
+          send "JOIN #{channel}"
+        end
       end
     end
   end
-  
 end

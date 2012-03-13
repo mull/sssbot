@@ -1,11 +1,15 @@
-require_relative 'irc_connection'
-require_relative 'bot_plugin'
+require 'active_support'
 
-module TeBot
-  class IRCBot < TeBot::IRCConnection
+module S3Bot
+  autoload :Connection, './connection'
+  autoload :Plugin, './plugin'
+end
+
+module S3Bot
+  class Bot < Connection
     @@plugins = {}
     
-    def initialize(server, port, nick, channel)
+    def initialize(server, port, nick, channels)
       @plugin_hooks = {
         :command => []
       }
@@ -17,7 +21,7 @@ module TeBot
     end
     
     def add_plugin(plugin_name)
-      require_relative "plugins/#{plugin_name}.rb"
+      require_relative "plugins/#{plugin_name}"
       klass_name = ""
       plugin_name.split("_").each do |p|
         klass_name += p.capitalize
@@ -67,7 +71,7 @@ end
 
 # The main loop
 # Just keep going if we get an error 8)
-bot = TeBot::IRCBot.new('irc.freenode.org', 6667, 'te-botjvl', '#mull-devving')
+bot = S3Bot::Bot.new('irc.freenode.org', 6667, 'te-botjvl', ['#mull-devving', '#mullemeck-devving'])
 #bot = TeBot::IRCBot.new('irc.quakenet.org', 6667, 'te-botjvl', '#theencounter.nu')
 
 # Load all plugins
